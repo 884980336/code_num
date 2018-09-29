@@ -1,0 +1,95 @@
+{% extends "gen.html" %}
+{% block content %}
+    <div class="container">
+    <div class="container row">
+        <div class="col-md-4 col-xs-12 col-md-offset-4">
+            <form class="form-horizontal" method="post" novalidate>
+                <div class="form-group">
+                    <h2 class="form-signin-heading">注册</h2>
+                    {% for i in form %}
+                        {% if i.label.text == '邮箱' %}
+                            <div class="form-group" style="position:relative;margin-bottom:0">
+                                <label class="col-sm-3 control-label">{{ i.label }}</label>
+                                <div class="col-sm-6">
+                                    {{ i }}
+                                </div>
+                                <button top="0" id="get_auth" style="position:absolute;" type="button"
+                                        class="btn btn-primary pull-right">获取验证码
+                                </button>
+                                <div class="col-sm-offset-3" style="margin-top: 34px;"><span
+                                        style="padding-left: 15px;color:red">&nbsp;{{ i.errors.0 }}</span></div>
+                            </div>
+                        {% elif i.label == '验证码' %}
+                            <div class="form-group" style="margin-bottom:0 ">
+                                <label class="col-sm-3 control-label">{{ i.label }}</label>
+                                <div class="col-sm-9">
+                                    {{ i }}
+                                </div>
+                                <div class="col-sm-offset-3"><span
+                                        style="padding-left: 15px;color:red">&nbsp;{{ i.errors.0 }}{{ imgtext_error }}</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="form-group" style="margin-bottom:0 ">
+                                <label class="col-sm-3 control-label">{{ i.label }}</label>
+                                <div class="col-sm-9">
+                                    {{ i }}
+                                </div>
+                                <div class="col-sm-offset-3"><span
+                                        style="padding-left: 15px;color:red">&nbsp;{{ i.errors.0 }}</span></div>
+                            </div>
+
+
+                        {% endif %}
+                    {% endfor %}
+                    <button id="ic" class="btn  btn-primary btn-block" type="submit">登录</button>
+                </div>
+            </form>
+        </div> <!-- /container -->
+
+    </div>
+    {#    <img src="/getimg" alt="">#}
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/static/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+   $('#get_auth').click(function () {
+        var email = $('#email').val();
+        var re = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+        if (re.test(email)) {
+            $.ajax({
+                'url': '/get_email',
+                'type': 'post',
+                'data': {
+                    'email': email,
+                },
+                success: function (data) {
+                    time = 60;
+                    data = data;
+                    var timer = setInterval(function(){
+                        if (time >0){
+                            $('#get_auth').text(data+'('+time+')');
+                            time = time -1;
+                        }
+                        else{
+                            $('#get_auth').text('获取验证码');
+                            $('#get_auth').removeAttr('disabled');
+                            clearInterval(timer);
+                        }
+                    }, 1000);
+                    $('#get_auth').attr('disabled','');
+
+
+                }
+            })
+        } else {
+            $(this).next().children().first().text("格式错误")
+        }
+
+    });
+</script>
+{% endblock %}

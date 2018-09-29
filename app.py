@@ -18,7 +18,7 @@
 #             print(str(i, encoding="utf8"))
 #         # print(str(file_obj.stream.read(), encoding="utf8"))
 #         return "OK"
-from  app import app
+from app import app
 
 if __name__ == '__main__':
     app.run()

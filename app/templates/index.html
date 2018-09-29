@@ -1,0 +1,218 @@
+{% extends "gen.html" %}
+
+{% block style %}
+    <style>
+        .border {
+            border-style: solid;
+            border-color: cornflowerblue;
+            border-width: 1px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="my_cls" style="height:400px;width:50%" class="pull-left border"></div>
+    <div id="history" style="height:400px;width:50%" class="pull-left border"></div>
+    <div id="top" style="height:400px;width:50%" class="pull-left border"></div>
+    <!-- ECharts单文件引入 -->
+    <div class="pull-right border" style="height:400px;width:50%;text-align: center;">
+        <div><h2> <b>代码提交</b></h2></div>
+        <div>(支持py, text, zip, docx, html)</div>
+        <div>
+            <label for="file"><img src="/static/add.jpg" alt="" width="200px" height="200px" style="top:50%"></label>
+        </div>
+        <input type="file" name="file" id="file" style="display: none">
+        <div>
+            <button type="button" class="btn btn-info" id="send" style="margin-top: 30px">提交</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="/static/layer/layer.js"></script>
+    <script>
+        var withe_list = ["py", "txt", "docx", "html", "zip"];
+        $("#send").on("click", function () {
+            var upload_file = $("#file")[0].files[0];
+            if (upload_file === undefined) {
+                layer.open({
+                    title: '上传错误'
+                    , content: '请选择文件'
+                });
+            } else if (upload_file.size / 1024 / 1024 > 10) {
+                layer.open({
+                    title: '上传错误'
+                    , content: '文件大于10M'
+                });
+            } else if (withe_list.indexOf(upload_file.name.split(".")[upload_file.name.split(".").length - 1]) === -1) {
+                layer.open({
+                    title: '上传错误'
+                    , content: '不支持该类型文件'
+                });
+            } else {
+                var formData = new FormData();
+
+                formData.append("file", upload_file);
+                $.ajax({
+                    contentType: false, // 必须将这两项设置为false
+                    processData: false,
+                    type: "post",
+                    data: formData,
+                    success: function (data) {
+                        layer.open({
+                            title: '上传成功'
+                            , content: '上传成功'
+                        });
+                        setTimeout(function(){location="/count"},1000);
+                    }
+                })
+            }
+        });
+    </script>
+    <script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+
+
+    <script type="text/javascript">
+        // 路径配置
+        require.config({
+            paths: {
+                echarts: 'http://echarts.baidu.com/build/dist'
+            }
+        });
+        // 使用
+        require(
+            [
+                'echarts',
+                'echarts/chart/bar', // 使用柱状图就加载bar模块，按需加载
+                'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+            ],
+            function (ec) {
+                // 基于准备好的dom，初始化echarts图表
+                var history = ec.init(document.getElementById('my_cls'));
+                var my_cls = ec.init(document.getElementById('history'));
+                var top10 = ec.init(document.getElementById('top'));
+                var my_ls = {
+                    tooltip: {
+                        show: true
+                    },
+                    legend: {
+                        data: ['今日班级统计']
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            {#data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]#}
+                            {#data: ["2018-9-20", "2018-9-21", "2018-9-22", "2018-9-23", "2018-9-24", "2018-9-25"]#}
+                            data:
+                            [
+                                {% for i in my_cls %}
+                                    '{{ i.name }}',
+                                {% endfor %}
+                            ]
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            "name": "代码量",
+                            "type": "bar",
+                            {#"data": [5, 20, 40, 10, 10, 20]#}
+                            'data':
+                            [
+                                {% for i in my_cls%}
+                                    {{ i.count }},
+                                {% endfor %}
+                            ]
+                        },
+                    ]
+                };
+                var my_class = {
+                    tooltip: {
+                        show: true
+                    },
+                    legend: {
+                        data: ['我的历史']
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            {#data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]#}
+                            {#data: ["2018-9-20", "2018-9-21", "2018-9-22", "2018-9-23", "2018-9-24", "2018-9-25"]#}
+                            data:
+                            [
+                                {% for i in my %}
+                                    '{{ i.data }}',
+                                {% endfor %}
+                            ]
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            "name": "代码量",
+                            "type": "line",
+                            {#"data": [5, 20, 40, 10, 10, 20]#}
+                            'data':
+                            [
+                                {% for i in my%}
+                                    {{ i.count }},
+                                {% endfor %}
+                            ]
+                        },
+                    ]
+                };
+                var tp10 = {
+                    tooltip: {
+                        show: true
+                    },
+                    legend: {
+                        data: ['今日修仙榜']
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            {#data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]#}
+                            {#data: ["2018-9-20", "2018-9-21", "2018-9-22", "2018-9-23", "2018-9-24", "2018-9-25"]#}
+                            data:
+                            [
+                                {% for i in top10 %}
+                                    '{{ i.cname }}-{{ i.name }}',
+                                {% endfor %}
+                            ]
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value'
+                        }
+                    ],
+                    series: [
+                        {
+                            "name": "代码量",
+                            "type": "bar",
+                            {#"data": [5, 20, 40, 10, 10, 20]#}
+                            'data':
+                            [
+                                {% for i in top10 %}
+                                    {{ i.count }},
+                                {% endfor %}
+                            ]
+                        },
+                    ]
+                };
+                // 为echarts对象加载数据
+                history.setOption(my_ls);
+                my_cls.setOption(my_class);
+                top10.setOption(tp10);
+            }
+        );
+    </script>
+{% endblock js %}

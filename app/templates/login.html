@@ -1,0 +1,44 @@
+{% extends "gen.html" %}
+{% block content %}
+    <div class="container">
+    <div class="container row">
+        <div class="col-md-4 col-xs-12 col-md-offset-4">
+            <form class="form-horizontal col-md-8" action="{{ request.get_full_path }}" method="post" novalidate>
+                <div class="form-group">
+                    <h2 class="form-signin-heading">登录</h2>
+                    {% for i in form %}
+                        {% if i.label.text == '验证码' %}
+                            <div>
+                                <div class="col-md-3" style="padding:0">{{ i.label }}</div>
+                                <div class="col-md-9" style="padding:0;margin-bottom: 4px">
+                                    <img id="img" src="/getimg" alt="点击刷新">
+                                </div>
+                            </div>
+                            {{ i }}
+
+
+                            <div><span style="color:red">&nbsp;{{ i.errors.0 }}</span></div>
+                        {% else %}
+                            <div>{{ i.label }}{{ i }}</div>
+                            <div><span style="color:red">&nbsp;{{ i.errors.0 }}</span></div>
+                        {% endif %}
+                    {% endfor %}
+                    <button id="ic" class="btn  btn-primary btn-block" type="submit">登录</button>
+                </div>
+            </form>
+        </div> <!-- /container -->
+
+    </div>
+{% endblock %}
+
+{#    <img src="/getimg" alt="">#}
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+
+</div>
+{% block js %}
+    <script>
+        $("#img").on("click", function () {
+            $("#img").attr("src", $("#img").attr("src") + "?")
+        })
+    </script>
+{% endblock %}
