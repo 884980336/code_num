@@ -18,6 +18,10 @@ RECV_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.
 
 us = Blueprint("app01", __name__)
 
+@us.route("/")
+def home():
+    return render_template("home.html")
+
 @us.route("/count", methods=["GET", "POST"])
 def count():
     if request.method == "POST":
@@ -183,3 +187,8 @@ def get_email():
     email.send(msg)
     session["mail"] = auth
     return "已发送"
+
+@us.route("/logout")
+def logout():
+    auth.logout()
+    return redirect("/")
